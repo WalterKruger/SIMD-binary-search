@@ -119,7 +119,7 @@ void printKeys(const struct STreeNode *nodeToPrint, const size_t keys) {
 }
 
 // Return the largest key, less than or equal to the input
-int32_t binSIMD_closestLssEql_8(const int32_t keyToFind, const struct STree *treeToSearch) {
+int32_t binSIMD_closestLssEql_SSE(const int32_t keyToFind, const struct STree *treeToSearch) {
     struct STreeNode *curNode = treeToSearch->head;
     //printf("\n");
 
@@ -161,7 +161,7 @@ int32_t binSIMD_closestLssEql_8(const int32_t keyToFind, const struct STree *tre
 }
 
 // Return the largest key, less than or equal to the input
-int32_t binSIMD_closestLssEql_16(const int32_t keyToFind, const struct STree *treeToSearch) {
+int32_t binSIMD_closestLssEql_AVX(const int32_t keyToFind, const struct STree *treeToSearch) {
     struct STreeNode *curNode = treeToSearch->head;
     //printf("\n");
 
@@ -202,7 +202,7 @@ int32_t binSIMD_closestLssEql_16(const int32_t keyToFind, const struct STree *tr
     }
 }
 
-// Return the largest key, less than or equal to the input
+// Search S-Tree without special SIMD instructions
 int32_t binSIMD_linear(const int32_t keyToFind, const struct STree *treeToSearch) {
     struct STreeNode *curNode = treeToSearch->head;
     //printf("\n");
@@ -251,6 +251,7 @@ void printSTree(const struct STree *treeToPrint) {
     printNodeBranches(treeToPrint->head, treeToPrint->parallel_cmps, 0);
 }
 
+// Traditional method to compare with
 int32_t binarySearch(int32_t *array, int32_t x, int32_t high) {
     int32_t low = 0;
 
@@ -278,6 +279,7 @@ unsigned rndNumber(const unsigned lowerBound, const unsigned upperBound) {
 }
 
 int main() {
+    // Change so size of SIMD vector is filled with type (SSE: 4, AVX: 8)
     const uint8_t parralelCompares = 8;
     size_t elements = 100000;
 
@@ -310,6 +312,7 @@ int main() {
     //for (size_t i=0; i<elements; i++)
     //    printf("%d vs %d\n", i, orderedNums[ binSIMD_linear(i, newSTree) ]);
     
+    // Performance messuring
     clock_t start_t = clock();
 
     int32_t foundNum;
@@ -317,9 +320,9 @@ int main() {
     for (size_t i=0; i< 50000000; i++) {
         numToFind = ((size_t)1 << 32)* rand() / RAND_MAX;
         // binarySearch(orderedNums ,numToFind, elements)
-        //printf("%d closest? %d\n", numToFind, orderedNums[ binSIMD_closestLssEql_8(numToFind, newSTree) ]);
+        //printf("%d closest? %d\n", numToFind, orderedNums[ binSIMD_closestLssEql_SSE(numToFind, newSTree) ]);
         
-        foundNum = binSIMD_closestLssEql_16(numToFind, newSTree);
+        foundNum = binSIMD_closestLssEql_AVX(numToFind, newSTree);
         //foundNum = binarySearch(orderedNums ,numToFind, elements);
     }
     clock_t end_t = clock();
